@@ -3,15 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello Cloudflare Pages!</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Modern Cloudflare Pages Site</title>
+    <!--
+    This is the Tailwind CSS CDN. It provides a full set of utility classes
+    to style the page without writing any custom CSS files. It's great for rapid prototyping.
+    -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* This is a simple custom CSS block to apply a specific font */
+        body {
+            font-family: "Inter", sans-serif;
+        }
+    </style>
 </head>
-<body>
-    <div class="container">
-        <h1>Welcome to my website!</h1>
-        <p>This site was deployed automatically using Cloudflare Pages.</p>
-        <button id="myButton">Click me!</button>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+
+    <!-- Main card container with a modern, clean design -->
+    <div class="bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-slate-200 w-full max-w-2xl text-center transition-all duration-300 transform hover:shadow-2xl">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-slate-800 leading-tight mb-4">
+            Hello Cloudflare Pages!
+        </h1>
+        <p class="text-lg md:text-xl text-slate-600 mb-8">
+            This is a modern, responsive website deployed automatically via GitHub.
+        </p>
+        
+        <!-- Interactive button with hover effect -->
+        <button id="myButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1">
+            Learn More
+        </button>
     </div>
-    <script src="script.js"></script>
+
+    <!-- 
+    This is a custom modal dialog. It's initially hidden and will be shown
+    by the JavaScript when the button is clicked. This is a better practice than using `alert()`.
+    -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full text-center transform transition-all duration-300 scale-95 opacity-0">
+            <div class="flex items-center justify-center text-blue-600 text-5xl mb-4">
+                ✨
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">
+                A Wild Modal Appears!
+            </h2>
+            <p class="text-slate-600 mb-6">
+                This is a custom message box. It's more stylish and user-friendly.
+            </p>
+            <button id="closeModal" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold py-2 px-6 rounded-lg transition duration-300">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Get references to the button and the modal elements
+        const myButton = document.getElementById('myButton');
+        const modal = document.getElementById('modal');
+        const closeModalButton = document.getElementById('closeModal');
+        const modalContent = modal.querySelector('div');
+
+        // Function to show the modal with animation
+        function showModal() {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        // Function to hide the modal with animation
+        function hideModal() {
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Add event listeners to show and hide the modal
+        myButton.addEventListener('click', showModal);
+        closeModalButton.addEventListener('click', hideModal);
+
+        // Hide modal when clicking outside of it
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                hideModal();
+            }
+        });
+    </script>
+
 </body>
 </html>
