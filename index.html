@@ -31,9 +31,34 @@
         input[type="number"] {
             -moz-appearance: textfield; /* Firefox */
         }
+        .message-box {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 2rem;
+            background-color: #ef4444;
+            color: white;
+            font-weight: bold;
+            border-radius: 9999px; /* rounded-full */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none;
+            animation: fadeInOut 4s forwards;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            90% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Message Box for user feedback -->
+    <div id="message-box" class="message-box"></div>
 
     <!-- Main container for the app -->
     <div id="setup-screen" class="bg-gray-800 p-8 md:p-12 rounded-3xl shadow-2xl border border-gray-700 w-full max-w-2xl text-center transition-all duration-300 transform scale-100 relative">
@@ -75,7 +100,7 @@
         <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4">Skull King Scoring</h1>
         <h2 id="round-title" class="text-2xl md:text-3xl font-bold text-red-400 mb-6">Round 1 (1 Card)</h2>
         
-        <div class="w-full overflow-x-auto">
+        <div id="round-table-container" class="w-full overflow-x-auto">
             <table class="min-w-full bg-gray-900 rounded-lg shadow-inner">
                 <thead>
                     <tr>
@@ -93,7 +118,22 @@
             </table>
         </div>
 
+        <!-- Summary Table (initially hidden) -->
+        <div id="summary-table-container" class="hidden w-full overflow-x-auto">
+            <table class="min-w-full bg-gray-900 rounded-lg shadow-inner">
+                <thead id="summary-table-head">
+                    <!-- Summary table header will be dynamically inserted here -->
+                </thead>
+                <tbody id="summary-table-body">
+                    <!-- Summary table rows will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </div>
+
         <div id="game-buttons" class="mt-8 flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4 w-full">
+            <button id="previous-round-btn" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-full shadow-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105 active:scale-95 hidden">
+                Previous Round
+            </button>
             <button id="next-round-btn" class="px-6 py-3 bg-green-600 text-white font-bold rounded-full shadow-lg hover:bg-green-700 transition duration-300 transform hover:scale-105 active:scale-95">
                 Next Round
             </button>
@@ -118,14 +158,29 @@
         const selectionMessage = document.getElementById('selection-message');
         const startGameBtn = document.getElementById('start-game-btn');
         const roundTitle = document.getElementById('round-title');
+        const roundTableContainer = document.getElementById('round-table-container');
         const scoreTableBody = document.getElementById('score-table-body');
+        const summaryTableContainer = document.getElementById('summary-table-container');
+        const summaryTableHead = document.getElementById('summary-table-head');
+        const summaryTableBody = document.getElementById('summary-table-body');
+        const previousRoundBtn = document.getElementById('previous-round-btn');
         const nextRoundBtn = document.getElementById('next-round-btn');
         const endGameBtn = document.getElementById('end-game-btn');
+        const messageBox = document.getElementById('message-box');
 
         let playerCount = 0;
         let selectedPlayers = [];
         let gameData = [];
         let currentRound = 1;
+
+        // Function to display a temporary message to the user
+        function showMessage(message) {
+            messageBox.textContent = message;
+            messageBox.style.display = 'block';
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 4000);
+        }
 
         // Function to render the player name buttons on the setup screen
         function renderPlayerButtons() {
@@ -180,10 +235,7 @@
                 if (selectedPlayers.length < playerCount) {
                     selectedPlayers.push(name);
                 } else {
-                    selectionMessage.textContent = `Cannot select more than ${playerCount} players.`;
-                    setTimeout(() => {
-                        updateSetupUI();
-                    }, 2000);
+                    showMessage(`Cannot select more than ${playerCount} players.`);
                     return;
                 }
             }
@@ -211,19 +263,94 @@
             }
             return score;
         }
+
+        // Function to recalculate total scores for all players up to the current round
+        function recalculateTotalScores() {
+            selectedPlayers.forEach((player, index) => {
+                let total = 0;
+                for (let i = 0; i < 10; i++) {
+                    // Only add score if the round has been played
+                    if (gameData[index].roundScores[i] !== null) {
+                        total += gameData[index].roundScores[i];
+                    }
+                }
+                gameData[index].totalScore = total;
+            });
+        }
+
+        // Function to render the final game summary table
+        function renderSummaryTable() {
+            // Hide the round-by-round table and show the summary table
+            roundTableContainer.classList.add('hidden');
+            summaryTableContainer.classList.remove('hidden');
+
+            // Update title and buttons for the end of the game
+            roundTitle.textContent = "Final Scores";
+            previousRoundBtn.classList.add('hidden');
+            nextRoundBtn.classList.add('hidden');
+            endGameBtn.classList.remove('hidden');
+            endGameBtn.textContent = "Restart Game";
+            
+            // Clear previous table content
+            summaryTableHead.innerHTML = '';
+            summaryTableBody.innerHTML = '';
+            
+            // Create table header
+            const headerRow = document.createElement('tr');
+            let headerHtml = `<th class="px-4 py-2 border-b-2 border-gray-700 text-left text-sm leading-4 font-medium text-gray-400 uppercase tracking-wider">Player</th>`;
+            for (let i = 1; i <= 10; i++) {
+                headerHtml += `<th class="px-2 py-2 border-b-2 border-gray-700 text-center text-sm leading-4 font-medium text-gray-400 uppercase tracking-wider">R${i} Bid/Tricks</th>`;
+            }
+            headerHtml += `<th class="px-4 py-2 border-b-2 border-gray-700 text-center text-sm leading-4 font-medium text-gray-400 uppercase tracking-wider">Final Score</th>`;
+            headerRow.innerHTML = headerHtml;
+            summaryTableHead.appendChild(headerRow);
+
+            // Populate the table with final game data
+            gameData.forEach(player => {
+                const tr = document.createElement('tr');
+                tr.classList.add('border-b', 'border-gray-700', 'hover:bg-gray-700', 'transition-colors');
+
+                // Player name cell
+                let rowHtml = `<td class="px-4 py-4 whitespace-nowrap text-left font-medium text-white">${player.name}</td>`;
+                
+                // Bid/Tricks for each round
+                for (let i = 0; i < 10; i++) {
+                    const bid = player.bids[i] !== null ? player.bids[i] : '-';
+                    const tricks = player.tricksWon[i] !== null ? player.tricksWon[i] : '-';
+                    rowHtml += `<td class="px-2 py-4 text-center text-white">${bid}/${tricks}</td>`;
+                }
+
+                // Final Score cell
+                rowHtml += `<td class="px-4 py-4 text-center font-bold text-white">${player.totalScore}</td>`;
+                
+                tr.innerHTML = rowHtml;
+                summaryTableBody.appendChild(tr);
+            });
+        }
         
         // Function to render the game scoring table
         function renderScoreTable() {
+            if (currentRound > 10) {
+                renderSummaryTable();
+                return;
+            }
+
+            // Hide the summary table and show the round-by-round table
+            summaryTableContainer.classList.add('hidden');
+            roundTableContainer.classList.remove('hidden');
+
             scoreTableBody.innerHTML = ''; // Clear table
             roundTitle.textContent = `Round ${currentRound} (${currentRound} Card${currentRound > 1 ? 's' : ''})`;
 
-            // Dynamically set the end game button visibility
-            if (currentRound > 10) {
-                nextRoundBtn.classList.add('hidden');
-                endGameBtn.classList.remove('hidden');
-                roundTitle.textContent = "Game Over!";
-                return;
+            // Show or hide the "Previous Round" button
+            if (currentRound > 1) {
+                previousRoundBtn.classList.remove('hidden');
+            } else {
+                previousRoundBtn.classList.add('hidden');
             }
+            
+            nextRoundBtn.classList.remove('hidden');
+            endGameBtn.classList.add('hidden');
 
             selectedPlayers.forEach((playerName, index) => {
                 const tr = document.createElement('tr');
@@ -239,7 +366,9 @@
                 const bidCell = document.createElement('td');
                 const bidInput = document.createElement('input');
                 bidInput.type = 'number';
-                bidInput.value = gameData[index].bids[currentRound - 1] || ''; // Set value to empty string
+                // Correctly set the value: if it's null, set to an empty string. Otherwise, set to the value.
+                const bidValue = gameData[index].bids[currentRound - 1];
+                bidInput.value = bidValue !== null ? bidValue : '';
                 bidInput.min = 0;
                 bidInput.max = currentRound;
                 bidInput.id = `bid-${index}`;
@@ -252,7 +381,9 @@
                 const tricksWonCell = document.createElement('td');
                 const tricksInput = document.createElement('input');
                 tricksInput.type = 'number';
-                tricksInput.value = gameData[index].tricksWon[currentRound - 1] || ''; // Set value to empty string
+                // Correctly set the value: if it's null, set to an empty string. Otherwise, set to the value.
+                const tricksValue = gameData[index].tricksWon[currentRound - 1];
+                tricksInput.value = tricksValue !== null ? tricksValue : '';
                 tricksInput.min = 0;
                 tricksInput.max = currentRound;
                 tricksInput.id = `tricks-${index}`;
@@ -265,7 +396,9 @@
                 const bonusCell = document.createElement('td');
                 const bonusInput = document.createElement('input');
                 bonusInput.type = 'number';
-                bonusInput.value = gameData[index].bonuses[currentRound - 1] || ''; // Set value to empty string
+                // Correctly set the value: if it's null, set to an empty string. Otherwise, set to the value.
+                const bonusValue = gameData[index].bonuses[currentRound - 1];
+                bonusInput.value = bonusValue !== null ? bonusValue : '';
                 bonusInput.id = `bonus-${index}`;
                 bonusInput.min = 0;
                 bonusInput.classList.add('w-20', 'bg-gray-700', 'text-white', 'rounded-md', 'px-2', 'py-1', 'focus:outline-none', 'focus:ring-2', 'focus:ring-red-500', 'text-center');
@@ -275,7 +408,8 @@
 
                 // Round Score Cell
                 const roundScoreCell = document.createElement('td');
-                roundScoreCell.textContent = gameData[index].roundScores[currentRound - 1] || 0;
+                const roundScoreValue = gameData[index].roundScores[currentRound - 1];
+                roundScoreCell.textContent = roundScoreValue !== null ? roundScoreValue : '';
                 roundScoreCell.classList.add('px-4', 'py-4', 'text-center', 'text-white', 'font-bold');
                 tr.appendChild(roundScoreCell);
                 
@@ -296,31 +430,43 @@
             const bids = [];
             const tricksWon = [];
             const bonuses = [];
+            let isValid = true;
 
             for (let i = 0; i < playerCount; i++) {
-                const bid = parseInt(document.getElementById(`bid-${i}`).value, 10) || 0;
-                const tricks = parseInt(document.getElementById(`tricks-${i}`).value, 10) || 0;
-                const bonus = parseInt(document.getElementById(`bonus-${i}`).value, 10) || 0;
+                const bidValue = document.getElementById(`bid-${i}`).value;
+                const tricksValue = document.getElementById(`tricks-${i}`).value;
+                const bonusValue = document.getElementById(`bonus-${i}`).value;
 
-                if (isNaN(bid) || isNaN(tricks) || bid > currentRound || tricks > currentRound || totalTricks + tricks > currentRound) {
-                     // Simple error message for now, can be improved with a custom modal
-                    console.error("Invalid input. Please check bids, tricks, and total tricks for the round.");
-                    return;
+                const bid = bidValue.trim() === '' ? null : parseInt(bidValue, 10);
+                const tricks = tricksValue.trim() === '' ? null : parseInt(tricksValue, 10);
+                const bonus = bonusValue.trim() === '' ? null : parseInt(bonusValue, 10);
+
+                if (isNaN(bid) || isNaN(tricks) || (bid !== null && (bid > currentRound || bid < 0)) || (tricks !== null && (tricks > currentRound || tricks < 0))) {
+                    isValid = false;
+                    break;
                 }
 
                 bids.push(bid);
                 tricksWon.push(tricks);
                 bonuses.push(bonus);
-                totalTricks += tricks;
+
+                if (tricks !== null) {
+                    totalTricks += tricks;
+                }
             }
             
+            if (!isValid) {
+                showMessage("Invalid input. Please check bids, tricks, and bonus values.");
+                return;
+            }
+
             if (totalTricks !== currentRound) {
-                console.error(`Total tricks won (${totalTricks}) must equal the number of cards in the round (${currentRound}).`);
+                showMessage(`Total tricks won (${totalTricks}) must equal the number of cards in the round (${currentRound}).`);
                 return;
             }
 
 
-            // Calculate scores for each player
+            // Calculate scores for each player and save to gameData
             selectedPlayers.forEach((playerName, index) => {
                 const bid = bids[index];
                 const tricks = tricksWon[index];
@@ -330,7 +476,7 @@
                 let finalRoundScore = roundScore;
                 
                 // Apply bonus points only if the bid was correct
-                if (bid === tricks) {
+                if (bid === tricks && bonus !== null) {
                     finalRoundScore += bonus;
                 }
 
@@ -338,18 +484,26 @@
                 gameData[index].tricksWon[currentRound - 1] = tricks;
                 gameData[index].bonuses[currentRound - 1] = bonus;
                 gameData[index].roundScores[currentRound - 1] = finalRoundScore;
-                gameData[index].totalScore += finalRoundScore;
             });
-
+            
+            // Recalculate all total scores after a round is complete
+            recalculateTotalScores();
+            
             currentRound++; // Move to the next round
             renderScoreTable(); // Re-render the table with new data
         });
 
+        // Event listener for the "Previous Round" button
+        previousRoundBtn.addEventListener('click', () => {
+            if (currentRound > 1) {
+                currentRound--;
+                renderScoreTable();
+            }
+        });
+
         // Event listener for the "End Game" button
         endGameBtn.addEventListener('click', () => {
-            // Display final scores or restart the game
-            alert("Game Over! The final scores are displayed.");
-            // You could add logic here to restart the game
+            // Reload the page to restart the game
             location.reload();
         });
 
@@ -378,10 +532,10 @@
             // Initialize game data for each player
             gameData = selectedPlayers.map(name => ({
                 name: name,
-                bids: new Array(10).fill(0),
-                tricksWon: new Array(10).fill(0),
-                bonuses: new Array(10).fill(0),
-                roundScores: new Array(10).fill(0),
+                bids: new Array(10).fill(null),
+                tricksWon: new Array(10).fill(null),
+                bonuses: new Array(10).fill(null),
+                roundScores: new Array(10).fill(null),
                 totalScore: 0
             }));
 
