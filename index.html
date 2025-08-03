@@ -1,119 +1,389 @@
-
-<!-- This is an SVG logo for "Don's net.net" with a black, white, and red color scheme. -->
-<!-- SVG is a vector format, so this logo will be perfectly sharp at any size. -->
-<svg width="800" height="200" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
-
-  <!-- A white background for contrast, though it can be removed if the page has a white background. -->
-  <!-- <rect width="100%" height="100%" fill="#FFFFFF"/> -->
-
-  <!-- The main text of the logo. -->
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="100" font-weight="bold" fill="#000000">
-    <!-- Main company name in black -->
-    Don's net
-    
-    <!-- The ".net" part of the name -->
-    <tspan fill="#000000">.</tspan>
-    <tspan fill="#000000">net</tspan>
-  </text>
-  
-  <!-- A small red accent circle, positioned next to the last dot -->
-  <circle cx="56.5%" cy="50%" r="8" fill="#FF0000" />
-</svg>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Cloudflare Pages Site</title>
-    <!--
-    This is the Tailwind CSS CDN. It provides a full set of utility classes
-    to style the page without writing any custom CSS files. It's great for rapid prototyping.
-    -->
+    <title>Skull King Scorekeeper</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* This is a simple custom CSS block to apply a specific font */
         body {
-            font-family: "Inter", sans-serif;
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom styles for the player selection buttons */
+        .player-btn {
+            border: 2px solid transparent;
+            transition: all 0.2s ease-in-out;
+        }
+        .player-btn.selected {
+            background-color: #fca5a5; /* Red-300 */
+            color: #1f2937; /* Gray-800 */
+            border-color: #ef4444; /* Red-500 */
+            transform: scale(1.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
 
-    <!-- Main card container with a modern, clean design -->
-    <div class="bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-slate-200 w-full max-w-2xl text-center transition-all duration-300 transform hover:shadow-2xl">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-slate-800 leading-tight mb-4">
-            Hello Cloudflare Pages!
-        </h1>
-        <p class="text-lg md:text-xl text-slate-600 mb-8">
-            This is a modern, responsive website deployed automatically via GitHub.
-        </p>
+    <!-- Main container for the app -->
+    <div id="setup-screen" class="bg-gray-800 p-8 md:p-12 rounded-3xl shadow-2xl border border-gray-700 w-full max-w-2xl text-center transition-all duration-300 transform scale-100 relative">
         
-        <!-- Interactive button with hover effect -->
-        <button id="myButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1">
-            Learn More
-        </button>
-    </div>
+        <!-- Main title -->
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-6">Welcome to Skull King Scoring</h1>
 
-    <!-- 
-    This is a custom modal dialog. It's initially hidden and will be shown
-    by the JavaScript when the button is clicked. This is a better practice than using `alert()`.
-    -->
-    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full text-center transform transition-all duration-300 scale-95 opacity-0">
-            <div class="flex items-center justify-center text-blue-600 text-5xl mb-4">
-                ✨
+        <!-- Player count selection -->
+        <p class="text-lg md:text-xl text-gray-300 mb-8">How many players are playing?</p>
+        
+        <div class="flex justify-center space-x-4 mb-8">
+            <button id="three-players-btn" class="px-6 py-3 bg-red-600 text-white font-bold rounded-full shadow-lg hover:bg-red-700 transition duration-300 transform hover:scale-105 active:scale-95">
+                3 Players
+            </button>
+            <button id="four-players-btn" class="px-6 py-3 bg-red-600 text-white font-bold rounded-full shadow-lg hover:bg-red-700 transition duration-300 transform hover:scale-105 active:scale-95">
+                4 Players
+            </button>
+        </div>
+
+        <!-- Player name selection section -->
+        <div id="player-selection-section" class="hidden mt-8 text-left">
+            <h2 class="text-2xl md:text-3xl font-bold text-white mb-4 text-center">Select Players</h2>
+            
+            <!-- Message to guide the user on player selection -->
+            <p id="selection-message" class="text-center text-gray-400 mb-6"></p>
+
+            <div id="player-buttons-container" class="grid grid-cols-2 gap-4">
+                <!-- Player buttons will be dynamically inserted here -->
             </div>
-            <h2 class="text-2xl font-bold text-slate-800 mb-2">
-                A Wild Modal Appears!
-            </h2>
-            <p class="text-slate-600 mb-6">
-                This is a custom message box. It's more stylish and user-friendly.
-            </p>
-            <button id="closeModal" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold py-2 px-6 rounded-lg transition duration-300">
-                Close
+            
+            <button id="start-game-btn" class="mt-8 w-full px-6 py-3 bg-green-600 text-white font-bold rounded-full shadow-lg hover:bg-green-700 transition duration-300 transform hover:scale-105 active:scale-95 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                Start Game!
+            </button>
+        </div>
+    </div>
+    
+    <!-- Game screen (initially hidden) -->
+    <div id="game-screen" class="hidden bg-gray-800 p-8 md:p-12 rounded-3xl shadow-2xl border border-gray-700 w-full max-w-4xl text-center relative flex flex-col items-center">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4">Skull King Scoring</h1>
+        <h2 id="round-title" class="text-2xl md:text-3xl font-bold text-red-400 mb-6">Round 1 (1 Card)</h2>
+        
+        <div class="w-full overflow-x-auto">
+            <table class="min-w-full bg-gray-900 rounded-lg shadow-inner">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-2 border-b-2 border-gray-700 text-left text-sm leading-4 font-medium text-gray-400 uppercase tracking-wider">Player</th>
+                        <th class="px-4 py-2 border-b-2 border-gray-700 text-center text-sm leading-4 font-medium text-gray-400 uppercase tracking-wider">Bid</th>
+                        <th class="px-4 py-2 border-b-2 border-gray-700 text-center text-sm leading-4 font-medium text-gray-400 uppercase tracking-wider">Tricks Won</th>
+                        <th class="px-4 py-2 border-b-2 border-gray-700 text-center text-sm leading-4 font-medium text-gray-400 uppercase tracking-wider">Bonus</th>
+                        <th class="px-4 py-2 border-b-2 border-gray-700 text-center text-sm leading-4 font-medium text-gray-400 uppercase tracking-wider">Score</th>
+                        <th class="px-4 py-2 border-b-2 border-gray-700 text-center text-sm leading-4 font-medium text-gray-400 uppercase tracking-wider">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="score-table-body">
+                    <!-- Player rows will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="game-buttons" class="mt-8 flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4 w-full">
+            <button id="next-round-btn" class="px-6 py-3 bg-green-600 text-white font-bold rounded-full shadow-lg hover:bg-green-700 transition duration-300 transform hover:scale-105 active:scale-95">
+                Next Round
+            </button>
+            <button id="end-game-btn" class="px-6 py-3 bg-red-600 text-white font-bold rounded-full shadow-lg hover:bg-red-700 transition duration-300 transform hover:scale-105 active:scale-95 hidden">
+                End Game
             </button>
         </div>
     </div>
 
+
     <script>
-        // Get references to the button and the modal elements
-        const myButton = document.getElementById('myButton');
-        const modal = document.getElementById('modal');
-        const closeModalButton = document.getElementById('closeModal');
-        const modalContent = modal.querySelector('div');
+        // Define the static player names
+        const ALL_PLAYER_NAMES = ['Jason', 'Don', 'Les', 'Rich'];
 
-        // Function to show the modal with animation
-        function showModal() {
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modalContent.classList.remove('scale-95', 'opacity-0');
-                modalContent.classList.add('scale-100', 'opacity-100');
-            }, 10);
+        // Get references to the HTML elements
+        const setupScreen = document.getElementById('setup-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const threePlayersBtn = document.getElementById('three-players-btn');
+        const fourPlayersBtn = document.getElementById('four-players-btn');
+        const playerSelectionSection = document.getElementById('player-selection-section');
+        const playerButtonsContainer = document.getElementById('player-buttons-container');
+        const selectionMessage = document.getElementById('selection-message');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const roundTitle = document.getElementById('round-title');
+        const scoreTableBody = document.getElementById('score-table-body');
+        const nextRoundBtn = document.getElementById('next-round-btn');
+        const endGameBtn = document.getElementById('end-game-btn');
+
+        let playerCount = 0;
+        let selectedPlayers = [];
+        let gameData = [];
+        let currentRound = 1;
+
+        // Function to render the player name buttons on the setup screen
+        function renderPlayerButtons() {
+            playerButtonsContainer.innerHTML = '';
+            ALL_PLAYER_NAMES.forEach(name => {
+                const button = document.createElement('button');
+                button.textContent = name;
+                button.classList.add(
+                    'player-btn', 
+                    'px-6', 'py-4', 
+                    'bg-gray-700', 
+                    'text-lg', 'text-white', 
+                    'font-semibold', 
+                    'rounded-xl', 
+                    'shadow', 
+                    'hover:bg-gray-600', 
+                    'focus:outline-none', 
+                    'focus:ring-2', 
+                    'focus:ring-red-500'
+                );
+                
+                if (selectedPlayers.includes(name)) {
+                    button.classList.add('selected');
+                }
+
+                button.addEventListener('click', () => {
+                    togglePlayerSelection(name);
+                });
+
+                playerButtonsContainer.appendChild(button);
+            });
         }
 
-        // Function to hide the modal with animation
-        function hideModal() {
-            modalContent.classList.remove('scale-100', 'opacity-100');
-            modalContent.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
+        // Function to update the selection message and button state
+        function updateSetupUI() {
+            const numSelected = selectedPlayers.length;
+            selectionMessage.textContent = `Selected players: ${numSelected} of ${playerCount}`;
 
-        // Add event listeners to show and hide the modal
-        myButton.addEventListener('click', showModal);
-        closeModalButton.addEventListener('click', hideModal);
-
-        // Hide modal when clicking outside of it
-        modal.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                hideModal();
+            if (numSelected === playerCount) {
+                startGameBtn.disabled = false;
+            } else {
+                startGameBtn.disabled = true;
             }
+        }
+
+        // Function to handle player button clicks (select/deselect)
+        function togglePlayerSelection(name) {
+            const index = selectedPlayers.indexOf(name);
+            if (index > -1) {
+                selectedPlayers.splice(index, 1);
+            } else {
+                if (selectedPlayers.length < playerCount) {
+                    selectedPlayers.push(name);
+                } else {
+                    selectionMessage.textContent = `Cannot select more than ${playerCount} players.`;
+                    setTimeout(() => {
+                        updateSetupUI();
+                    }, 2000);
+                    return;
+                }
+            }
+            renderPlayerButtons();
+            updateSetupUI();
+        }
+
+        // Scoring Logic Function
+        function calculateRoundScore(bid, tricksWon, round) {
+            let score = 0;
+            if (bid == tricksWon) {
+                // Correct bid
+                if (bid === 0) {
+                    score = round * 10;
+                } else {
+                    score = bid * 20;
+                }
+            } else {
+                // Incorrect bid
+                if (bid === 0) {
+                    score = tricksWon * -10;
+                } else {
+                    score = Math.abs(tricksWon - bid) * -10;
+                }
+            }
+            return score;
+        }
+        
+        // Function to render the game scoring table
+        function renderScoreTable() {
+            scoreTableBody.innerHTML = ''; // Clear table
+            roundTitle.textContent = `Round ${currentRound} (${currentRound} Card${currentRound > 1 ? 's' : ''})`;
+
+            // Dynamically set the end game button visibility
+            if (currentRound > 10) {
+                nextRoundBtn.classList.add('hidden');
+                endGameBtn.classList.remove('hidden');
+                roundTitle.textContent = "Game Over!";
+                return;
+            }
+
+            selectedPlayers.forEach((playerName, index) => {
+                const tr = document.createElement('tr');
+                tr.classList.add('border-b', 'border-gray-700', 'hover:bg-gray-700', 'transition-colors');
+
+                // Player Name Cell
+                const nameCell = document.createElement('td');
+                nameCell.textContent = playerName;
+                nameCell.classList.add('px-4', 'py-4', 'whitespace-nowrap', 'text-left', 'font-medium', 'text-white');
+                tr.appendChild(nameCell);
+
+                // Bid Input Cell
+                const bidCell = document.createElement('td');
+                const bidInput = document.createElement('input');
+                bidInput.type = 'number';
+                bidInput.value = gameData[index].bids[currentRound - 1] || 0;
+                bidInput.min = 0;
+                bidInput.max = currentRound;
+                bidInput.id = `bid-${index}`;
+                bidInput.classList.add('w-20', 'bg-gray-700', 'text-white', 'rounded-md', 'px-2', 'py-1', 'focus:outline-none', 'focus:ring-2', 'focus:ring-red-500', 'text-center');
+                bidCell.classList.add('px-4', 'py-4', 'text-center');
+                bidCell.appendChild(bidInput);
+                tr.appendChild(bidCell);
+
+                // Tricks Won Input Cell
+                const tricksWonCell = document.createElement('td');
+                const tricksInput = document.createElement('input');
+                tricksInput.type = 'number';
+                tricksInput.value = gameData[index].tricksWon[currentRound - 1] || 0;
+                tricksInput.min = 0;
+                tricksInput.max = currentRound;
+                tricksInput.id = `tricks-${index}`;
+                tricksInput.classList.add('w-20', 'bg-gray-700', 'text-white', 'rounded-md', 'px-2', 'py-1', 'focus:outline-none', 'focus:ring-2', 'focus:ring-red-500', 'text-center');
+                tricksWonCell.classList.add('px-4', 'py-4', 'text-center');
+                tricksWonCell.appendChild(tricksInput);
+                tr.appendChild(tricksWonCell);
+
+                // Bonus Cell (for later implementation of specific bonuses)
+                const bonusCell = document.createElement('td');
+                const bonusInput = document.createElement('input');
+                bonusInput.type = 'number';
+                bonusInput.value = gameData[index].bonuses[currentRound - 1] || 0;
+                bonusInput.id = `bonus-${index}`;
+                bonusInput.min = 0;
+                bonusInput.classList.add('w-20', 'bg-gray-700', 'text-white', 'rounded-md', 'px-2', 'py-1', 'focus:outline-none', 'focus:ring-2', 'focus:ring-red-500', 'text-center');
+                bonusCell.classList.add('px-4', 'py-4', 'text-center');
+                bonusCell.appendChild(bonusInput);
+                tr.appendChild(bonusCell);
+
+                // Round Score Cell
+                const roundScoreCell = document.createElement('td');
+                roundScoreCell.textContent = gameData[index].roundScores[currentRound - 1] || 0;
+                roundScoreCell.classList.add('px-4', 'py-4', 'text-center', 'text-white', 'font-bold');
+                tr.appendChild(roundScoreCell);
+                
+                // Total Score Cell
+                const totalScoreCell = document.createElement('td');
+                totalScoreCell.textContent = gameData[index].totalScore;
+                totalScoreCell.classList.add('px-4', 'py-4', 'text-center', 'text-white', 'font-bold');
+                tr.appendChild(totalScoreCell);
+
+                scoreTableBody.appendChild(tr);
+            });
+        }
+
+        // Handle the "Next Round" button click
+        nextRoundBtn.addEventListener('click', () => {
+            // Get the bids and tricks won for the current round
+            let totalTricks = 0;
+            const bids = [];
+            const tricksWon = [];
+            const bonuses = [];
+
+            for (let i = 0; i < playerCount; i++) {
+                const bid = parseInt(document.getElementById(`bid-${i}`).value, 10);
+                const tricks = parseInt(document.getElementById(`tricks-${i}`).value, 10);
+                const bonus = parseInt(document.getElementById(`bonus-${i}`).value, 10);
+
+                if (isNaN(bid) || isNaN(tricks) || bid > currentRound || tricks > currentRound || totalTricks + tricks > currentRound) {
+                     // Simple error message for now, can be improved with a custom modal
+                    console.error("Invalid input. Please check bids, tricks, and total tricks for the round.");
+                    return;
+                }
+
+                bids.push(bid);
+                tricksWon.push(tricks);
+                bonuses.push(bonus);
+                totalTricks += tricks;
+            }
+            
+            if (totalTricks !== currentRound) {
+                console.error(`Total tricks won (${totalTricks}) must equal the number of cards in the round (${currentRound}).`);
+                return;
+            }
+
+
+            // Calculate scores for each player
+            selectedPlayers.forEach((playerName, index) => {
+                const bid = bids[index];
+                const tricks = tricksWon[index];
+                const bonus = bonuses[index];
+                
+                const roundScore = calculateRoundScore(bid, tricks, currentRound);
+                let finalRoundScore = roundScore;
+                
+                // Apply bonus points only if the bid was correct
+                if (bid === tricks) {
+                    finalRoundScore += bonus;
+                }
+
+                gameData[index].bids[currentRound - 1] = bid;
+                gameData[index].tricksWon[currentRound - 1] = tricks;
+                gameData[index].bonuses[currentRound - 1] = bonus;
+                gameData[index].roundScores[currentRound - 1] = finalRoundScore;
+                gameData[index].totalScore += finalRoundScore;
+            });
+
+            currentRound++; // Move to the next round
+            renderScoreTable(); // Re-render the table with new data
+        });
+
+        // Event listener for the "End Game" button
+        endGameBtn.addEventListener('click', () => {
+            // Display final scores or restart the game
+            alert("Game Over! The final scores are displayed.");
+            // You could add logic here to restart the game
+            location.reload();
+        });
+
+
+        // Handle player count button clicks
+        threePlayersBtn.addEventListener('click', () => {
+            playerCount = 3;
+            selectedPlayers = [];
+            playerSelectionSection.classList.remove('hidden');
+            renderPlayerButtons();
+            updateSetupUI();
+        });
+
+        fourPlayersBtn.addEventListener('click', () => {
+            playerCount = 4;
+            selectedPlayers = [...ALL_PLAYER_NAMES];
+            playerSelectionSection.classList.remove('hidden');
+            renderPlayerButtons();
+            updateSetupUI();
+        });
+
+        // Handle the "Start Game" button click
+        startGameBtn.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent form submission
+            
+            // Initialize game data for each player
+            gameData = selectedPlayers.map(name => ({
+                name: name,
+                bids: new Array(10).fill(0),
+                tricksWon: new Array(10).fill(0),
+                bonuses: new Array(10).fill(0),
+                roundScores: new Array(10).fill(0),
+                totalScore: 0
+            }));
+
+            // Hide the setup screen and show the game screen
+            setupScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+
+            // Render the initial score table
+            renderScoreTable();
         });
     </script>
 
 </body>
 </html>
-
