@@ -166,7 +166,38 @@
     <div id="help-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden modal p-4">
         <div class="bg-gray-800 p-6 md:p-8 rounded-3xl shadow-2xl border border-gray-700 w-full max-w-2xl text-center">
             <h3 class="text-2xl md:text-3xl font-bold text-white mb-4">How to Score Skull King</h3>
-            <p class="text-gray-300 mb-8">This is a generic help site. We can fill this with actual Skull King rules and scoring tips later.</p>
+            <p class="text-gray-300 text-left mb-6">
+                Welcome, landlubber! Here are a few tips to help you use this scorekeeper:
+            </p>
+            <ul class="text-gray-300 text-left list-disc list-inside mb-6 space-y-2">
+                <li>
+                    You only need to enter values for **non-zero bids and tricks won**. If a player bid or won 0 tricks, you can simply leave the field blank.
+                </li>
+                <li>
+                    The **Bonus** column only applies if a player's bid matches the number of tricks they won. Tapping on this field will bring up a menu of special scoring cards.
+                </li>
+                <li>
+                    The app will automatically detect if the total number of tricks won in a round doesn't match the number of cards dealt. This happens when the **Kraken** card is played. It will ask for confirmation before moving to the next round.
+                </li>
+            </ul>
+            <h4 class="text-xl md:text-2xl font-bold text-white mb-4">Quick Bonus Guide</h4>
+            <p class="text-gray-300 text-left mb-8">
+                If a player's bid is correct, they can score bonus points by collecting special cards:
+            </p>
+            <ul class="text-gray-300 text-left list-disc list-inside mb-8 space-y-2">
+                <li>
+                    **+10 points** for capturing a Jolly Roger card (the one with the '14' on it).
+                </li>
+                <li>
+                    **+20 points** for a Pirate capturing a Mermaid.
+                </li>
+                <li>
+                    **+30 points** for the Skull King capturing a Pirate.
+                </li>
+                <li>
+                    **+40 points** for a Mermaid capturing the Skull King.
+                </li>
+            </ul>
             <button id="back-to-game-btn" class="px-6 py-3 bg-red-600 text-white font-bold rounded-full shadow-lg hover:bg-red-700 transition duration-300 transform hover:scale-105 active:scale-95">
                 Back to Game
             </button>
