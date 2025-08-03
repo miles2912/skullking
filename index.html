@@ -22,6 +22,15 @@
             transform: scale(1.05);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
+        /* Hide the number input arrows/spinners for all browsers */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield; /* Firefox */
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
@@ -230,7 +239,7 @@
                 const bidCell = document.createElement('td');
                 const bidInput = document.createElement('input');
                 bidInput.type = 'number';
-                bidInput.value = gameData[index].bids[currentRound - 1] || 0;
+                bidInput.value = gameData[index].bids[currentRound - 1] || ''; // Set value to empty string
                 bidInput.min = 0;
                 bidInput.max = currentRound;
                 bidInput.id = `bid-${index}`;
@@ -243,7 +252,7 @@
                 const tricksWonCell = document.createElement('td');
                 const tricksInput = document.createElement('input');
                 tricksInput.type = 'number';
-                tricksInput.value = gameData[index].tricksWon[currentRound - 1] || 0;
+                tricksInput.value = gameData[index].tricksWon[currentRound - 1] || ''; // Set value to empty string
                 tricksInput.min = 0;
                 tricksInput.max = currentRound;
                 tricksInput.id = `tricks-${index}`;
@@ -252,11 +261,11 @@
                 tricksWonCell.appendChild(tricksInput);
                 tr.appendChild(tricksWonCell);
 
-                // Bonus Cell (for later implementation of specific bonuses)
+                // Bonus Cell
                 const bonusCell = document.createElement('td');
                 const bonusInput = document.createElement('input');
                 bonusInput.type = 'number';
-                bonusInput.value = gameData[index].bonuses[currentRound - 1] || 0;
+                bonusInput.value = gameData[index].bonuses[currentRound - 1] || ''; // Set value to empty string
                 bonusInput.id = `bonus-${index}`;
                 bonusInput.min = 0;
                 bonusInput.classList.add('w-20', 'bg-gray-700', 'text-white', 'rounded-md', 'px-2', 'py-1', 'focus:outline-none', 'focus:ring-2', 'focus:ring-red-500', 'text-center');
@@ -289,9 +298,9 @@
             const bonuses = [];
 
             for (let i = 0; i < playerCount; i++) {
-                const bid = parseInt(document.getElementById(`bid-${i}`).value, 10);
-                const tricks = parseInt(document.getElementById(`tricks-${i}`).value, 10);
-                const bonus = parseInt(document.getElementById(`bonus-${i}`).value, 10);
+                const bid = parseInt(document.getElementById(`bid-${i}`).value, 10) || 0;
+                const tricks = parseInt(document.getElementById(`tricks-${i}`).value, 10) || 0;
+                const bonus = parseInt(document.getElementById(`bonus-${i}`).value, 10) || 0;
 
                 if (isNaN(bid) || isNaN(tricks) || bid > currentRound || tricks > currentRound || totalTricks + tricks > currentRound) {
                      // Simple error message for now, can be improved with a custom modal
