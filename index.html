@@ -9,7 +9,6 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            /* Removed the transition to prevent layout shifts that caused double-clicks */
         }
         /* Custom styles for the player selection buttons */
         .player-btn {
@@ -57,6 +56,14 @@
             background-color: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(5px);
         }
+        /* New flashing animation for the winner's score */
+        @keyframes flash-winner {
+            0%, 100% { box-shadow: 0 0 0px 0px rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 10px 5px rgba(239, 68, 68, 0.7); }
+        }
+        .winner-score-flash {
+            animation: flash-winner 2s ease-in-out infinite;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col items-center justify-start p-4 pt-12">
@@ -84,7 +91,7 @@
         </div>
         
         <!-- New Help button, centered below the player count buttons -->
-        <div class="flex justify-center">
+        <div id="help-button-container" class="flex justify-center">
             <button id="help-btn" class="px-6 py-3 bg-yellow-400 text-gray-900 font-bold rounded-full shadow-lg hover:bg-yellow-500 transition duration-300 transform hover:scale-105 active:scale-95">
                 Help for Noobs
             </button>
@@ -233,7 +240,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Load Game Modal (new modal for local storage) -->
     <div id="load-game-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden modal p-4">
         <div class="bg-gray-800 p-6 md:p-8 rounded-3xl shadow-2xl border border-gray-700 w-full max-w-sm text-center">
@@ -262,6 +269,7 @@
         const threePlayersBtn = document.getElementById('three-players-btn');
         const fourPlayersBtn = document.getElementById('four-players-btn');
         const helpBtn = document.getElementById('help-btn'); // New help button
+        const helpButtonContainer = document.getElementById('help-button-container'); // New reference for the container
         const playerSelectionSection = document.getElementById('player-selection-section');
         const playerButtonsContainer = document.getElementById('player-buttons-container');
         const selectionMessage = document.getElementById('selection-message');
@@ -414,12 +422,16 @@
         // Scoring Logic Function
         function calculateRoundScore(bid, tricksWon, bonus, round) {
             let score = 0;
-            if (bid == tricksWon) {
+            // Handle null bids/tricks by treating them as 0 for scoring
+            const effectiveBid = bid === null ? 0 : bid;
+            const effectiveTricksWon = tricksWon === null ? 0 : tricksWon;
+
+            if (effectiveBid == effectiveTricksWon) {
                 // Correct bid
-                if (bid === 0) {
+                if (effectiveBid === 0) {
                     score = round * 10;
                 } else {
-                    score = bid * 20;
+                    score = effectiveBid * 20;
                 }
                 // Add bonus points if the bid was correct
                 if (bonus !== null) {
@@ -427,10 +439,10 @@
                 }
             } else {
                 // Incorrect bid
-                if (bid === 0) {
-                    score = tricksWon * -10;
+                if (effectiveBid === 0) {
+                    score = effectiveTricksWon * -10;
                 } else {
-                    score = Math.abs(tricksWon - bid) * -10;
+                    score = Math.abs(effectiveTricksWon - effectiveBid) * -10;
                 }
             }
             return score;
@@ -477,10 +489,19 @@
             headerRow.innerHTML = headerHtml;
             summaryTableHead.appendChild(headerRow);
 
+            // Find the highest score to determine the winner(s)
+            let maxScore = -Infinity;
+            gameData.forEach(player => {
+                if (player.totalScore > maxScore) {
+                    maxScore = player.totalScore;
+                }
+            });
+
             // Populate the table with final game data
             gameData.forEach(player => {
                 const tr = document.createElement('tr');
                 tr.classList.add('border-b', 'border-gray-700', 'hover:bg-gray-600', 'transition-colors');
+                const isWinner = player.totalScore === maxScore;
 
                 // Player name cell
                 let rowHtml = `<td class="px-4 py-4 whitespace-nowrap text-left font-medium text-white">${player.name}</td>`;
@@ -492,12 +513,39 @@
                     rowHtml += `<td class="px-2 py-4 text-center text-white">${bid}/${tricks}</td>`;
                 }
 
-                // Final Score cell
-                rowHtml += `<td class="px-4 py-4 text-center font-bold text-white">${player.totalScore}</td>`;
+                // Final Score cell with conditional flashing class
+                const winnerClass = isWinner ? 'winner-score-flash' : '';
+                rowHtml += `<td class="px-4 py-4 text-center">
+                                <span class="bg-red-600 text-white font-bold px-3 py-1 rounded-full inline-block min-w-[48px] text-center shadow-md ${winnerClass}">
+                                    ${player.totalScore}
+                                </span>
+                            </td>`;
                 
                 tr.innerHTML = rowHtml;
                 summaryTableBody.appendChild(tr);
             });
+        }
+
+        // Function to update the gameData with current table input values
+        function updateGameDataFromTable() {
+            selectedPlayers.forEach((playerName, index) => {
+                const bidInput = document.getElementById(`bid-${index}`);
+                const tricksInput = document.getElementById(`tricks-${index}`);
+                
+                // Convert empty strings to null for saving, and 0 for scoring calculations
+                const bidValue = bidInput.value.trim() === '' ? null : parseInt(bidInput.value, 10);
+                const tricksValue = tricksInput.value.trim() === '' ? null : parseInt(tricksInput.value, 10);
+
+                gameData[index].bids[currentRound - 1] = bidValue;
+                gameData[index].tricksWon[currentRound - 1] = tricksValue;
+
+                // Re-calculate the score for the current round with the new values
+                const bonus = gameData[index].bonuses[currentRound - 1];
+                const roundScore = calculateRoundScore(bidValue, tricksValue, bonus, currentRound);
+                gameData[index].roundScores[currentRound - 1] = roundScore;
+            });
+            recalculateTotalScores();
+            saveGameState();
         }
         
         // Function to render the game scoring table
@@ -539,7 +587,7 @@
                 const bidInput = document.createElement('input');
                 bidInput.type = 'number';
                 const bidValue = gameData[index].bids[currentRound - 1];
-                // Display 0 if the value is 0, otherwise an empty string to show the placeholder
+                // Display empty string to allow for "null" input
                 bidInput.value = bidValue !== null ? bidValue : '';
                 bidInput.min = 0;
                 bidInput.max = currentRound;
@@ -577,6 +625,8 @@
                 
                 // Add event listener to show the bonus modal
                 bonusDisplay.addEventListener('click', () => {
+                    // Update the game data with current table values before opening the modal
+                    updateGameDataFromTable();
                     activePlayerIndex = index;
                     bonusModal.classList.remove('hidden');
                 });
@@ -594,8 +644,11 @@
                 
                 // Total Score Cell
                 const totalScoreCell = document.createElement('td');
-                totalScoreCell.textContent = gameData[index].totalScore;
-                totalScoreCell.classList.add('px-4', 'py-4', 'text-center', 'text-white', 'font-bold');
+                const totalScoreSpan = document.createElement('span');
+                totalScoreSpan.textContent = gameData[index].totalScore;
+                totalScoreSpan.classList.add('bg-red-600', 'text-white', 'font-bold', 'px-3', 'py-1', 'rounded-full', 'inline-block', 'min-w-[48px]', 'text-center', 'shadow-md');
+                totalScoreCell.classList.add('px-4', 'py-4', 'text-center');
+                totalScoreCell.appendChild(totalScoreSpan);
                 tr.appendChild(totalScoreCell);
 
                 scoreTableBody.appendChild(tr);
@@ -604,36 +657,8 @@
         
         // Function to process the scores and advance to the next round
         function processNextRound() {
-            const bids = [];
-            const tricksWon = [];
-
-            for (let i = 0; i < playerCount; i++) {
-                const bidInput = document.getElementById(`bid-${i}`);
-                const tricksInput = document.getElementById(`tricks-${i}`);
-                
-                // Check if the input value is an empty string, and set to '0' if it is.
-                const bidValue = bidInput.value.trim() === '' ? '0' : bidInput.value;
-                const tricksValue = tricksInput.value.trim() === '' ? '0' : tricksInput.value;
-
-                const bid = parseInt(bidValue, 10);
-                const tricks = parseInt(tricksValue, 10);
-
-                bids.push(bid);
-                tricksWon.push(tricks);
-            }
-
-            // Calculate scores for each player and save to gameData
-            selectedPlayers.forEach((playerName, index) => {
-                const bid = bids[index];
-                const tricks = tricksWon[index];
-                const bonus = gameData[index].bonuses[currentRound - 1];
-                
-                const roundScore = calculateRoundScore(bid, tricks, bonus, currentRound);
-                
-                gameData[index].bids[currentRound - 1] = bid;
-                gameData[index].tricksWon[currentRound - 1] = tricks;
-                gameData[index].roundScores[currentRound - 1] = roundScore;
-            });
+            // Update game data from the table one last time
+            updateGameDataFromTable();
             
             // Recalculate all total scores after a round is complete
             recalculateTotalScores();
@@ -648,7 +673,22 @@
             button.addEventListener('click', () => {
                 const bonusValue = parseInt(button.dataset.value, 10);
                 if (activePlayerIndex !== -1) {
-                    gameData[activePlayerIndex].bonuses[currentRound - 1] = bonusValue;
+                    // Check if the bid and tricks match before applying bonus
+                    const bid = gameData[activePlayerIndex].bids[currentRound - 1];
+                    const tricks = gameData[activePlayerIndex].tricksWon[currentRound - 1];
+                    // The bug fix is here: if bid or tricks are null, they are treated as 0
+                    const effectiveBid = bid === null ? 0 : bid;
+                    const effectiveTricks = tricks === null ? 0 : tricks;
+
+                    if (effectiveBid === effectiveTricks) {
+                        gameData[activePlayerIndex].bonuses[currentRound - 1] = bonusValue;
+                        // Recalculate the score with the new bonus
+                        const roundScore = calculateRoundScore(bid, tricks, bonusValue, currentRound);
+                        gameData[activePlayerIndex].roundScores[currentRound - 1] = roundScore;
+                        recalculateTotalScores();
+                    } else {
+                        showMessage("Bonus can only be added if bid matches tricks won.");
+                    }
                     renderScoreTable(); // Re-render the table to show the new bonus
                     bonusModal.classList.add('hidden');
                     activePlayerIndex = -1; // Reset active player
@@ -660,7 +700,13 @@
         // Handle the "Clear Bonus" button click
         clearBonusBtn.addEventListener('click', () => {
             if (activePlayerIndex !== -1) {
+                const bid = gameData[activePlayerIndex].bids[currentRound - 1];
+                const tricks = gameData[activePlayerIndex].tricksWon[currentRound - 1];
                 gameData[activePlayerIndex].bonuses[currentRound - 1] = null;
+                // Recalculate the score without the bonus
+                const roundScore = calculateRoundScore(bid, tricks, null, currentRound);
+                gameData[activePlayerIndex].roundScores[currentRound - 1] = roundScore;
+                recalculateTotalScores();
                 renderScoreTable();
                 bonusModal.classList.add('hidden');
                 activePlayerIndex = -1;
@@ -672,6 +718,7 @@
         closeBonusModalBtn.addEventListener('click', () => {
             bonusModal.classList.add('hidden');
             activePlayerIndex = -1;
+            // No need to re-render, the data was already saved with updateGameDataFromTable()
         });
         
         // Kraken modal button listeners
@@ -687,34 +734,32 @@
 
         // Handle the "Next Round" button click
         nextRoundBtn.addEventListener('click', () => {
+            updateGameDataFromTable(); // Ensure data is saved before validation
             let totalTricks = 0;
             let isValid = true;
-            const bids = [];
-            const tricksWon = [];
 
             for (let i = 0; i < playerCount; i++) {
-                const bidValue = document.getElementById(`bid-${i}`).value.trim() === '' ? '0' : document.getElementById(`bid-${i}`).value;
-                const tricksValue = document.getElementById(`tricks-${i}`).value.trim() === '' ? '0' : document.getElementById(`tricks-${i}`).value;
+                const bid = gameData[i].bids[currentRound - 1];
+                const tricks = gameData[i].tricksWon[currentRound - 1];
 
-                const bid = parseInt(bidValue, 10);
-                const tricks = parseInt(tricksValue, 10);
+                // The bug fix is here: we now check for null, but process it as a valid 0
+                const effectiveBid = bid === null ? 0 : bid;
+                const effectiveTricks = tricks === null ? 0 : tricks;
 
-                if (isNaN(bid) || isNaN(tricks) || (bid > currentRound || bid < 0) || (tricks > currentRound || tricks < 0)) {
+                // Check for valid number inputs
+                if (isNaN(effectiveBid) || isNaN(effectiveTricks) || (effectiveBid > currentRound || effectiveBid < 0) || (effectiveTricks > currentRound || effectiveTricks < 0)) {
                     isValid = false;
                     break;
                 }
-
-                bids.push(bid);
-                tricksWon.push(tricks);
-
-                totalTricks += tricks;
+                
+                totalTricks += effectiveTricks;
             }
             
             if (!isValid) {
                 showMessage("Invalid input. Please check bids and tricks won values.");
                 return;
             }
-
+            
             if (totalTricks !== currentRound) {
                 krakenModal.classList.remove('hidden');
             } else {
@@ -725,6 +770,7 @@
         // Event listener for the "Previous Round" button
         previousRoundBtn.addEventListener('click', () => {
             if (currentRound > 1) {
+                updateGameDataFromTable(); // Save current round data before going back
                 currentRound--;
                 renderScoreTable();
                 saveGameState(); // Save the new state
@@ -742,6 +788,7 @@
             playerCount = 3;
             selectedPlayers = [];
             playerSelectionSection.classList.remove('hidden');
+            helpButtonContainer.classList.add('hidden'); // Hide the help button container
             renderPlayerButtons();
             updateSetupUI();
         });
@@ -750,6 +797,7 @@
             playerCount = 4;
             selectedPlayers = [...ALL_PLAYER_NAMES];
             playerSelectionSection.classList.remove('hidden');
+            helpButtonContainer.classList.add('hidden'); // Hide the help button container
             renderPlayerButtons();
             updateSetupUI();
         });
@@ -816,9 +864,12 @@
                 const savedState = JSON.parse(localStorage.getItem(GAME_SAVE_KEY));
                 savedRoundNumberSpan.textContent = savedState.currentRound;
                 loadGameModal.classList.remove('hidden');
+                // The help button will be hidden by this logic if they resume a game
+                helpButtonContainer.classList.add('hidden');
             } else {
-                // Otherwise, show the normal setup screen
+                // Otherwise, show the normal setup screen and ensure help button is visible
                 setupScreen.classList.remove('hidden');
+                helpButtonContainer.classList.remove('hidden');
             }
         });
     </script>
