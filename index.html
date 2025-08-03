@@ -46,12 +46,15 @@
             display: none;
             animation: fadeInOut 4s forwards;
         }
-
         @keyframes fadeInOut {
             0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
             10% { opacity: 1; transform: translateX(-50%) translateY(0); }
             90% { opacity: 1; transform: translateX(-50%) translateY(0); }
             100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        }
+        .modal {
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
         }
     </style>
 </head>
@@ -143,6 +146,80 @@
         </div>
     </div>
 
+    <!-- Bonus Modal (initially hidden) -->
+    <div id="bonus-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden modal p-4">
+        <div class="bg-gray-800 p-6 md:p-8 rounded-3xl shadow-2xl border border-gray-700 w-full max-w-sm">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">Select Bonus Points</h3>
+                <button id="close-bonus-modal-btn" class="text-gray-400 hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Bonus options grid -->
+            <div class="grid grid-cols-2 gap-4">
+                <!-- 10 points bonus -->
+                <button class="bonus-btn flex flex-col items-center justify-center p-4 bg-gray-700 rounded-xl shadow hover:bg-gray-600 transition-colors" data-value="10">
+                    <span class="text-4xl">🃏</span>
+                    <span class="text-lg font-bold text-white mt-2">+10 Pts</span>
+                    <span class="text-xs text-gray-400 text-center mt-1">Captured a 14 card</span>
+                </button>
+                <!-- 20 points bonus -->
+                <button class="bonus-btn flex flex-col items-center justify-center p-4 bg-gray-700 rounded-xl shadow hover:bg-gray-600 transition-colors" data-value="20">
+                    <span class="text-4xl">🏴‍☠️</span>
+                    <span class="text-lg font-bold text-white mt-2">+20 Pts</span>
+                    <span class="text-xs text-gray-400 text-center mt-1">Captured Jolly Roger 14</span>
+                </button>
+                <!-- 20 points bonus (pirate captures mermaid) -->
+                <button class="bonus-btn flex flex-col items-center justify-center p-4 bg-gray-700 rounded-xl shadow hover:bg-gray-600 transition-colors" data-value="20">
+                    <span class="text-4xl">🏴‍☠️ &rarr; 🧜‍♀️</span>
+                    <span class="text-lg font-bold text-white mt-2">+20 Pts</span>
+                    <span class="text-xs text-gray-400 text-center mt-1">Pirate captured a Mermaid</span>
+                </button>
+                <!-- 30 points bonus -->
+                <button class="bonus-btn flex flex-col items-center justify-center p-4 bg-gray-700 rounded-xl shadow hover:bg-gray-600 transition-colors" data-value="30">
+                    <span class="text-4xl">💀👑 &rarr; 🏴‍☠️</span>
+                    <span class="text-lg font-bold text-white mt-2">+30 Pts</span>
+                    <span class="text-xs text-gray-400 text-center mt-1">Skull King captured a Pirate</span>
+                </button>
+                <!-- 40 points bonus (mermaid captures skull king) -->
+                <button class="bonus-btn flex flex-col items-center justify-center p-4 bg-gray-700 rounded-xl shadow hover:bg-gray-600 transition-colors" data-value="40">
+                    <span class="text-4xl">🧜‍♀️ &rarr; 💀👑</span>
+                    <span class="text-lg font-bold text-white mt-2">+40 Pts</span>
+                    <span class="text-xs text-gray-400 text-center mt-1">Mermaid captured Skull King</span>
+                </button>
+                 <!-- 50 points bonus (pirate captures skull king) -->
+                <button class="bonus-btn flex flex-col items-center justify-center p-4 bg-gray-700 rounded-xl shadow hover:bg-gray-600 transition-colors" data-value="50">
+                    <span class="text-4xl">🏴‍☠️ &rarr; 💀👑</span>
+                    <span class="text-lg font-bold text-white mt-2">+50 Pts</span>
+                    <span class="text-xs text-gray-400 text-center mt-1">Pirate captured Skull King</span>
+                </button>
+            </div>
+            
+            <button id="clear-bonus-btn" class="mt-6 w-full px-4 py-3 bg-red-600 text-white font-bold rounded-full shadow hover:bg-red-700 transition duration-300">
+                Clear Bonus
+            </button>
+        </div>
+    </div>
+    
+    <!-- Kraken Modal (initially hidden) -->
+    <div id="kraken-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden modal p-4">
+        <div class="bg-gray-800 p-6 md:p-8 rounded-3xl shadow-2xl border border-gray-700 w-full max-w-sm text-center">
+            <img src="https://placehold.co/150x150/0f172a/fca5a5?text=Kraken" alt="Kraken" class="mx-auto mb-4 rounded-xl">
+            <p class="text-gray-300 mb-6">The total number of tricks won does not match the number of cards this round. This can happen when a Kraken is played.</p>
+            <div class="flex justify-center space-x-4">
+                <button id="kraken-yes-btn" class="px-6 py-3 bg-green-600 text-white font-bold rounded-full shadow-lg hover:bg-green-700 transition duration-300 transform hover:scale-105 active:scale-95">
+                    Yes
+                </button>
+                <button id="kraken-no-btn" class="px-6 py-3 bg-red-600 text-white font-bold rounded-full shadow-lg hover:bg-red-700 transition duration-300 transform hover:scale-105 active:scale-95">
+                    No, go back
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         // Define the static player names
@@ -168,10 +245,22 @@
         const endGameBtn = document.getElementById('end-game-btn');
         const messageBox = document.getElementById('message-box');
 
+        // Bonus modal elements
+        const bonusModal = document.getElementById('bonus-modal');
+        const closeBonusModalBtn = document.getElementById('close-bonus-modal-btn');
+        const bonusButtons = document.querySelectorAll('.bonus-btn');
+        const clearBonusBtn = document.getElementById('clear-bonus-btn');
+        
+        // Kraken modal elements
+        const krakenModal = document.getElementById('kraken-modal');
+        const krakenYesBtn = document.getElementById('kraken-yes-btn');
+        const krakenNoBtn = document.getElementById('kraken-no-btn');
+
         let playerCount = 0;
         let selectedPlayers = [];
         let gameData = [];
         let currentRound = 1;
+        let activePlayerIndex = -1; // To track which player's bonus is being edited
 
         // Function to display a temporary message to the user
         function showMessage(message) {
@@ -244,7 +333,7 @@
         }
 
         // Scoring Logic Function
-        function calculateRoundScore(bid, tricksWon, round) {
+        function calculateRoundScore(bid, tricksWon, bonus, round) {
             let score = 0;
             if (bid == tricksWon) {
                 // Correct bid
@@ -252,6 +341,10 @@
                     score = round * 10;
                 } else {
                     score = bid * 20;
+                }
+                // Add bonus points if the bid was correct
+                if (bonus !== null) {
+                    score += bonus;
                 }
             } else {
                 // Incorrect bid
@@ -308,7 +401,7 @@
             // Populate the table with final game data
             gameData.forEach(player => {
                 const tr = document.createElement('tr');
-                tr.classList.add('border-b', 'border-gray-700', 'hover:bg-gray-700', 'transition-colors');
+                tr.classList.add('border-b', 'border-gray-700', 'hover:bg-gray-600', 'transition-colors');
 
                 // Player name cell
                 let rowHtml = `<td class="px-4 py-4 whitespace-nowrap text-left font-medium text-white">${player.name}</td>`;
@@ -354,7 +447,7 @@
 
             selectedPlayers.forEach((playerName, index) => {
                 const tr = document.createElement('tr');
-                tr.classList.add('border-b', 'border-gray-700', 'hover:bg-gray-700', 'transition-colors');
+                tr.classList.add('border-b', 'border-gray-700', 'hover:bg-gray-600', 'transition-colors');
 
                 // Player Name Cell
                 const nameCell = document.createElement('td');
@@ -366,13 +459,12 @@
                 const bidCell = document.createElement('td');
                 const bidInput = document.createElement('input');
                 bidInput.type = 'number';
-                // Correctly set the value: if it's null, set to an empty string. Otherwise, set to the value.
                 const bidValue = gameData[index].bids[currentRound - 1];
                 bidInput.value = bidValue !== null ? bidValue : '';
                 bidInput.min = 0;
                 bidInput.max = currentRound;
                 bidInput.id = `bid-${index}`;
-                bidInput.classList.add('w-20', 'bg-gray-700', 'text-white', 'rounded-md', 'px-2', 'py-1', 'focus:outline-none', 'focus:ring-2', 'focus:ring-red-500', 'text-center');
+                bidInput.classList.add('w-20', 'bg-gray-700', 'text-white', 'rounded-md', 'px-2', 'py-1', 'text-center', 'focus:outline-none', 'focus:ring-2', 'focus:ring-red-400', 'focus:bg-gray-600');
                 bidCell.classList.add('px-4', 'py-4', 'text-center');
                 bidCell.appendChild(bidInput);
                 tr.appendChild(bidCell);
@@ -381,29 +473,36 @@
                 const tricksWonCell = document.createElement('td');
                 const tricksInput = document.createElement('input');
                 tricksInput.type = 'number';
-                // Correctly set the value: if it's null, set to an empty string. Otherwise, set to the value.
                 const tricksValue = gameData[index].tricksWon[currentRound - 1];
                 tricksInput.value = tricksValue !== null ? tricksValue : '';
                 tricksInput.min = 0;
                 tricksInput.max = currentRound;
                 tricksInput.id = `tricks-${index}`;
-                tricksInput.classList.add('w-20', 'bg-gray-700', 'text-white', 'rounded-md', 'px-2', 'py-1', 'focus:outline-none', 'focus:ring-2', 'focus:ring-red-500', 'text-center');
+                tricksInput.classList.add('w-20', 'bg-gray-700', 'text-white', 'rounded-md', 'px-2', 'py-1', 'text-center', 'focus:outline-none', 'focus:ring-2', 'focus:ring-red-400', 'focus:bg-gray-600');
                 tricksWonCell.classList.add('px-4', 'py-4', 'text-center');
                 tricksWonCell.appendChild(tricksInput);
                 tr.appendChild(tricksWonCell);
 
-                // Bonus Cell
+                // Bonus Cell (now a clickable div)
                 const bonusCell = document.createElement('td');
-                const bonusInput = document.createElement('input');
-                bonusInput.type = 'number';
-                // Correctly set the value: if it's null, set to an empty string. Otherwise, set to the value.
                 const bonusValue = gameData[index].bonuses[currentRound - 1];
-                bonusInput.value = bonusValue !== null ? bonusValue : '';
-                bonusInput.id = `bonus-${index}`;
-                bonusInput.min = 0;
-                bonusInput.classList.add('w-20', 'bg-gray-700', 'text-white', 'rounded-md', 'px-2', 'py-1', 'focus:outline-none', 'focus:ring-2', 'focus:ring-red-500', 'text-center');
+                const bonusDisplay = document.createElement('div');
+                bonusDisplay.textContent = bonusValue !== null ? `+${bonusValue}` : 'Tap';
+                bonusDisplay.id = `bonus-${index}`;
+                bonusDisplay.classList.add(
+                    'w-20', 'bg-gray-700', 'text-white', 'rounded-md', 'px-2', 'py-1', 'text-center',
+                    'cursor-pointer', 'select-none', 'transition-colors', 'hover:bg-gray-600',
+                    'font-semibold'
+                );
+                
+                // Add event listener to show the bonus modal
+                bonusDisplay.addEventListener('click', () => {
+                    activePlayerIndex = index;
+                    bonusModal.classList.remove('hidden');
+                });
+
                 bonusCell.classList.add('px-4', 'py-4', 'text-center');
-                bonusCell.appendChild(bonusInput);
+                bonusCell.appendChild(bonusDisplay);
                 tr.appendChild(bonusCell);
 
                 // Round Score Cell
@@ -422,24 +521,96 @@
                 scoreTableBody.appendChild(tr);
             });
         }
-
-        // Handle the "Next Round" button click
-        nextRoundBtn.addEventListener('click', () => {
-            // Get the bids and tricks won for the current round
-            let totalTricks = 0;
+        
+        // Function to process the scores and advance to the next round
+        function processNextRound() {
             const bids = [];
             const tricksWon = [];
-            const bonuses = [];
-            let isValid = true;
 
             for (let i = 0; i < playerCount; i++) {
                 const bidValue = document.getElementById(`bid-${i}`).value;
                 const tricksValue = document.getElementById(`tricks-${i}`).value;
-                const bonusValue = document.getElementById(`bonus-${i}`).value;
 
                 const bid = bidValue.trim() === '' ? null : parseInt(bidValue, 10);
                 const tricks = tricksValue.trim() === '' ? null : parseInt(tricksValue, 10);
-                const bonus = bonusValue.trim() === '' ? null : parseInt(bonusValue, 10);
+
+                bids.push(bid);
+                tricksWon.push(tricks);
+            }
+
+            // Calculate scores for each player and save to gameData
+            selectedPlayers.forEach((playerName, index) => {
+                const bid = bids[index];
+                const tricks = tricksWon[index];
+                const bonus = gameData[index].bonuses[currentRound - 1];
+                
+                const roundScore = calculateRoundScore(bid, tricks, bonus, currentRound);
+                
+                gameData[index].bids[currentRound - 1] = bid;
+                gameData[index].tricksWon[currentRound - 1] = tricks;
+                gameData[index].roundScores[currentRound - 1] = roundScore;
+            });
+            
+            // Recalculate all total scores after a round is complete
+            recalculateTotalScores();
+            
+            currentRound++; // Move to the next round
+            renderScoreTable(); // Re-render the table with new data
+        }
+
+        // Handle bonus button clicks inside the modal
+        bonusButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const bonusValue = parseInt(button.dataset.value, 10);
+                if (activePlayerIndex !== -1) {
+                    gameData[activePlayerIndex].bonuses[currentRound - 1] = bonusValue;
+                    renderScoreTable(); // Re-render the table to show the new bonus
+                    bonusModal.classList.add('hidden');
+                    activePlayerIndex = -1; // Reset active player
+                }
+            });
+        });
+
+        // Handle the "Clear Bonus" button click
+        clearBonusBtn.addEventListener('click', () => {
+            if (activePlayerIndex !== -1) {
+                gameData[activePlayerIndex].bonuses[currentRound - 1] = null;
+                renderScoreTable();
+                bonusModal.classList.add('hidden');
+                activePlayerIndex = -1;
+            }
+        });
+
+        // Close bonus modal button listener
+        closeBonusModalBtn.addEventListener('click', () => {
+            bonusModal.classList.add('hidden');
+            activePlayerIndex = -1;
+        });
+        
+        // Kraken modal button listeners
+        krakenYesBtn.addEventListener('click', () => {
+            krakenModal.classList.add('hidden');
+            processNextRound();
+        });
+
+        krakenNoBtn.addEventListener('click', () => {
+            krakenModal.classList.add('hidden');
+            // Do nothing, user can now edit the values
+        });
+
+        // Handle the "Next Round" button click
+        nextRoundBtn.addEventListener('click', () => {
+            let totalTricks = 0;
+            let isValid = true;
+            const bids = [];
+            const tricksWon = [];
+
+            for (let i = 0; i < playerCount; i++) {
+                const bidValue = document.getElementById(`bid-${i}`).value;
+                const tricksValue = document.getElementById(`tricks-${i}`).value;
+
+                const bid = bidValue.trim() === '' ? null : parseInt(bidValue, 10);
+                const tricks = tricksValue.trim() === '' ? null : parseInt(tricksValue, 10);
 
                 if (isNaN(bid) || isNaN(tricks) || (bid !== null && (bid > currentRound || bid < 0)) || (tricks !== null && (tricks > currentRound || tricks < 0))) {
                     isValid = false;
@@ -448,7 +619,6 @@
 
                 bids.push(bid);
                 tricksWon.push(tricks);
-                bonuses.push(bonus);
 
                 if (tricks !== null) {
                     totalTricks += tricks;
@@ -456,41 +626,15 @@
             }
             
             if (!isValid) {
-                showMessage("Invalid input. Please check bids, tricks, and bonus values.");
+                showMessage("Invalid input. Please check bids and tricks won values.");
                 return;
             }
 
             if (totalTricks !== currentRound) {
-                showMessage(`Total tricks won (${totalTricks}) must equal the number of cards in the round (${currentRound}).`);
-                return;
+                krakenModal.classList.remove('hidden');
+            } else {
+                processNextRound();
             }
-
-
-            // Calculate scores for each player and save to gameData
-            selectedPlayers.forEach((playerName, index) => {
-                const bid = bids[index];
-                const tricks = tricksWon[index];
-                const bonus = bonuses[index];
-                
-                const roundScore = calculateRoundScore(bid, tricks, currentRound);
-                let finalRoundScore = roundScore;
-                
-                // Apply bonus points only if the bid was correct
-                if (bid === tricks && bonus !== null) {
-                    finalRoundScore += bonus;
-                }
-
-                gameData[index].bids[currentRound - 1] = bid;
-                gameData[index].tricksWon[currentRound - 1] = tricks;
-                gameData[index].bonuses[currentRound - 1] = bonus;
-                gameData[index].roundScores[currentRound - 1] = finalRoundScore;
-            });
-            
-            // Recalculate all total scores after a round is complete
-            recalculateTotalScores();
-            
-            currentRound++; // Move to the next round
-            renderScoreTable(); // Re-render the table with new data
         });
 
         // Event listener for the "Previous Round" button
