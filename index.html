@@ -140,8 +140,8 @@
             <button id="next-round-btn" class="px-6 py-3 bg-green-600 text-white font-bold rounded-full shadow-lg hover:bg-green-700 transition duration-300 transform hover:scale-105 active:scale-95">
                 Next Round
             </button>
-            <button id="end-game-btn" class="px-6 py-3 bg-red-600 text-white font-bold rounded-full shadow-lg hover:bg-red-700 transition duration-300 transform hover:scale-105 active:scale-95 hidden">
-                End Game
+            <button id="new-game-btn" class="px-6 py-3 bg-red-600 text-white font-bold rounded-full shadow-lg hover:bg-red-700 transition duration-300 transform hover:scale-105 active:scale-95 hidden">
+                New Game
             </button>
         </div>
     </div>
@@ -220,10 +220,27 @@
         </div>
     </div>
 
+    <!-- Load Game Modal (new modal for local storage) -->
+    <div id="load-game-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden modal p-4">
+        <div class="bg-gray-800 p-6 md:p-8 rounded-3xl shadow-2xl border border-gray-700 w-full max-w-sm text-center">
+            <h3 class="text-2xl font-bold text-white mb-4">Resume Game?</h3>
+            <p class="text-gray-300 mb-6">It looks like you have a game in progress. Would you like to continue from round <span id="saved-round-number" class="font-bold"></span>?</p>
+            <div class="flex flex-col space-y-4">
+                <button id="resume-game-btn" class="px-6 py-3 bg-green-600 text-white font-bold rounded-full shadow-lg hover:bg-green-700 transition duration-300 transform hover:scale-105 active:scale-95">
+                    Resume Game
+                </button>
+                <button id="new-game-from-modal-btn" class="px-6 py-3 bg-red-600 text-white font-bold rounded-full shadow-lg hover:bg-red-700 transition duration-300 transform hover:scale-105 active:scale-95">
+                    Start New Game
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         // Define the static player names
         const ALL_PLAYER_NAMES = ['Jason', 'Don', 'Les', 'Rich'];
+        const GAME_SAVE_KEY = 'skullKingGameState';
 
         // Get references to the HTML elements
         const setupScreen = document.getElementById('setup-screen');
@@ -242,7 +259,7 @@
         const summaryTableBody = document.getElementById('summary-table-body');
         const previousRoundBtn = document.getElementById('previous-round-btn');
         const nextRoundBtn = document.getElementById('next-round-btn');
-        const endGameBtn = document.getElementById('end-game-btn');
+        const newGameBtn = document.getElementById('new-game-btn'); // Renamed from endGameBtn
         const messageBox = document.getElementById('message-box');
 
         // Bonus modal elements
@@ -255,6 +272,12 @@
         const krakenModal = document.getElementById('kraken-modal');
         const krakenYesBtn = document.getElementById('kraken-yes-btn');
         const krakenNoBtn = document.getElementById('kraken-no-btn');
+
+        // Load Game modal elements (new)
+        const loadGameModal = document.getElementById('load-game-modal');
+        const savedRoundNumberSpan = document.getElementById('saved-round-number');
+        const resumeGameBtn = document.getElementById('resume-game-btn');
+        const newGameFromModalBtn = document.getElementById('new-game-from-modal-btn');
 
         let playerCount = 0;
         let selectedPlayers = [];
@@ -269,6 +292,43 @@
             setTimeout(() => {
                 messageBox.style.display = 'none';
             }, 4000);
+        }
+
+        // --- LOCAL STORAGE FUNCTIONS ---
+        // Function to save the current game state to local storage
+        function saveGameState() {
+            const state = {
+                gameData: gameData,
+                selectedPlayers: selectedPlayers,
+                playerCount: playerCount,
+                currentRound: currentRound
+            };
+            localStorage.setItem(GAME_SAVE_KEY, JSON.stringify(state));
+        }
+
+        // Function to load the game state from local storage
+        function loadGameState() {
+            const savedState = localStorage.getItem(GAME_SAVE_KEY);
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                gameData = state.gameData;
+                selectedPlayers = state.selectedPlayers;
+                playerCount = state.playerCount;
+                currentRound = state.currentRound;
+                return true;
+            }
+            return false;
+        }
+
+        // Function to clear the saved game state from local storage
+        function clearSavedGame() {
+            localStorage.removeItem(GAME_SAVE_KEY);
+        }
+        
+        // Function to start a new game by clearing local storage and reloading
+        function restartGame() {
+            clearSavedGame();
+            location.reload();
         }
 
         // Function to render the player name buttons on the setup screen
@@ -381,8 +441,8 @@
             roundTitle.textContent = "Final Scores";
             previousRoundBtn.classList.add('hidden');
             nextRoundBtn.classList.add('hidden');
-            endGameBtn.classList.remove('hidden');
-            endGameBtn.textContent = "Restart Game";
+            newGameBtn.classList.remove('hidden');
+            newGameBtn.textContent = "Start New Game";
             
             // Clear previous table content
             summaryTableHead.innerHTML = '';
@@ -443,7 +503,7 @@
             }
             
             nextRoundBtn.classList.remove('hidden');
-            endGameBtn.classList.add('hidden');
+            newGameBtn.classList.add('hidden');
 
             selectedPlayers.forEach((playerName, index) => {
                 const tr = document.createElement('tr');
@@ -556,6 +616,7 @@
             
             currentRound++; // Move to the next round
             renderScoreTable(); // Re-render the table with new data
+            saveGameState(); // Save the new state
         }
 
         // Handle bonus button clicks inside the modal
@@ -567,6 +628,7 @@
                     renderScoreTable(); // Re-render the table to show the new bonus
                     bonusModal.classList.add('hidden');
                     activePlayerIndex = -1; // Reset active player
+                    saveGameState(); // Save the new state
                 }
             });
         });
@@ -578,6 +640,7 @@
                 renderScoreTable();
                 bonusModal.classList.add('hidden');
                 activePlayerIndex = -1;
+                saveGameState(); // Save the new state
             }
         });
 
@@ -642,13 +705,13 @@
             if (currentRound > 1) {
                 currentRound--;
                 renderScoreTable();
+                saveGameState(); // Save the new state
             }
         });
 
-        // Event listener for the "End Game" button
-        endGameBtn.addEventListener('click', () => {
-            // Reload the page to restart the game
-            location.reload();
+        // Event listener for the "New Game" button
+        newGameBtn.addEventListener('click', () => {
+            restartGame();
         });
 
 
@@ -689,6 +752,40 @@
 
             // Render the initial score table
             renderScoreTable();
+            saveGameState();
+        });
+        
+        // Load Game modal button listeners
+        resumeGameBtn.addEventListener('click', () => {
+            if (loadGameState()) {
+                loadGameModal.classList.add('hidden');
+                setupScreen.classList.add('hidden');
+                gameScreen.classList.remove('hidden');
+                renderScoreTable();
+            } else {
+                showMessage("Could not load saved game data.");
+                loadGameModal.classList.add('hidden');
+                setupScreen.classList.remove('hidden');
+            }
+        });
+
+        newGameFromModalBtn.addEventListener('click', () => {
+            restartGame();
+        });
+
+
+        // --- INITIALIZATION ---
+        // On page load, check for a saved game
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem(GAME_SAVE_KEY)) {
+                // If a saved game exists, show the load game modal
+                const savedState = JSON.parse(localStorage.getItem(GAME_SAVE_KEY));
+                savedRoundNumberSpan.textContent = savedState.currentRound;
+                loadGameModal.classList.remove('hidden');
+            } else {
+                // Otherwise, show the normal setup screen
+                setupScreen.classList.remove('hidden');
+            }
         });
     </script>
 
