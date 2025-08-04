@@ -676,10 +676,13 @@
         // Event listener for the "Previous Round" button
         previousRoundBtn.addEventListener('click', () => {
             if (currentRound > 1) {
-                updateGameDataFromTable(); // Save current round data before going back
+                // BUG FIX: Removed the call to updateGameDataFromTable() here.
+                // The "Next Round" button is now the designated "save" action.
+                // This prevents unsaved data for the current round from overwriting itself
+                // with empty values when you go back.
                 currentRound--;
                 renderScoreTable();
-                saveGameState(); // Save the new state
+                saveGameState(); // Save the state after the round change
             }
         });
 
