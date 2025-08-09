@@ -385,7 +385,8 @@
             const effectiveBid = bid === null ? 0 : bid;
             const effectiveTricksWon = tricksWon === null ? 0 : tricksWon;
 
-            if (effectiveBid == effectiveTricksWon) {
+            // BUG FIX: Changed '==' to '===' for strict comparison to prevent type coercion issues.
+            if (effectiveBid === effectiveTricksWon) {
                 // Correct bid
                 if (effectiveBid === 0) {
                     score = round * 10;
@@ -399,7 +400,9 @@
             } else {
                 // Incorrect bid
                 if (effectiveBid === 0) {
-                    score = effectiveTricksWon * -10;
+                    // This is the new rule: -10 points per card dealt that round.
+                    // The number of cards dealt is equal to the round number.
+                    score = round * -10;
                 } else {
                     score = Math.abs(effectiveTricksWon - effectiveBid) * -10;
                 }
