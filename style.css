@@ -93,18 +93,32 @@ input[type="number"] {
     }
 
     #round-table-container {
-        overflow-x: auto;
+        overflow-x: visible;
         -webkit-overflow-scrolling: touch;
     }
 
     #round-table-container table {
-        min-width: 25rem;
+        min-width: 0;
+        width: 100%;
         table-layout: fixed;
     }
 
+    #round-table-container th:nth-child(1),
+    #round-table-container td:nth-child(1) { width: 18%; }
+    #round-table-container th:nth-child(2),
+    #round-table-container td:nth-child(2) { width: 15%; }
+    #round-table-container th:nth-child(3),
+    #round-table-container td:nth-child(3) { width: 15%; }
+    #round-table-container th:nth-child(4),
+    #round-table-container td:nth-child(4) { width: 15%; }
+    #round-table-container th:nth-child(5),
+    #round-table-container td:nth-child(5) { width: 16%; }
+    #round-table-container th:nth-child(6),
+    #round-table-container td:nth-child(6) { width: 16%; }
+
     #round-table-container th,
     #round-table-container td {
-        padding: 0.3rem 0.18rem;
+        padding: 0.25rem 0.08rem;
         vertical-align: middle;
     }
 
@@ -114,16 +128,16 @@ input[type="number"] {
         line-height: 1;
     }
 
-    #round-table-container th:nth-child(1)::after { content: "P"; }
+    #round-table-container th:nth-child(1)::after { content: "Player"; }
     #round-table-container th:nth-child(2)::after { content: "Bid"; }
     #round-table-container th:nth-child(3)::after { content: "Won"; }
     #round-table-container th:nth-child(4)::after { content: "Bon"; }
     #round-table-container th:nth-child(5)::after { content: "Rnd"; }
-    #round-table-container th:nth-child(6)::after { content: "Tot"; }
+    #round-table-container th:nth-child(6)::after { content: "Total"; }
 
     #round-table-container th::after {
         color: #9ca3af;
-        font-size: 0.65rem;
+        font-size: 0.58rem;
         font-weight: 700;
         text-transform: uppercase;
     }
@@ -132,7 +146,6 @@ input[type="number"] {
     #score-table-body td:first-child {
         left: 0;
         position: sticky;
-        width: 4.4rem;
         z-index: 5;
     }
 
@@ -142,22 +155,23 @@ input[type="number"] {
 
     #score-table-body td:first-child {
         background-color: #111827;
-        font-size: 0.8rem;
+        font-size: 0.72rem;
         overflow: hidden;
         text-overflow: ellipsis;
     }
 
     #score-table-body input {
-        min-height: 34px;
-        width: 3.15rem;
-        font-size: 0.95rem;
-        padding: 0.25rem;
-        border-radius: 0.35rem;
+        min-height: 31px;
+        width: 2.55rem;
+        font-size: 0.85rem;
+        padding: 0.15rem;
+        border-radius: 0.25rem;
     }
 
     #score-table-body span {
-        min-width: 3.1rem;
-        padding: 0.25rem 0.35rem;
+        min-width: 2.75rem;
+        padding: 0.2rem 0.25rem;
+        font-size: 0.82rem;
     }
 
     #game-buttons {
