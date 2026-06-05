@@ -57,7 +57,7 @@ input[type="number"] {
 }
 
 #score-table-body input {
-    min-height: 44px;
+    min-height: 40px;
     font-size: 1rem;
 }
 
@@ -67,24 +67,25 @@ input[type="number"] {
 
 @media (max-width: 640px) {
     body {
-        padding: 0.75rem 0.5rem 4.5rem;
+        padding: 0.5rem 0.35rem 3.75rem;
     }
 
     #setup-screen,
     #game-screen {
-        padding: 1rem;
-        border-radius: 1rem;
+        padding: 0.75rem;
+        border-radius: 0.75rem;
     }
 
     #setup-screen h1,
     #game-screen h1 {
-        font-size: 2rem;
+        font-size: 1.65rem;
         line-height: 1.1;
+        margin-bottom: 0.45rem;
     }
 
     #round-title {
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
+        font-size: 1.15rem;
+        margin-bottom: 0.65rem;
     }
 
     #player-buttons-container {
@@ -92,84 +93,86 @@ input[type="number"] {
     }
 
     #round-table-container {
-        overflow-x: visible;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
-    #round-table-container table,
-    #round-table-container thead,
-    #round-table-container tbody,
-    #round-table-container tr,
+    #round-table-container table {
+        min-width: 25rem;
+        table-layout: fixed;
+    }
+
+    #round-table-container th,
     #round-table-container td {
-        display: block;
-        width: 100%;
+        padding: 0.3rem 0.18rem;
+        vertical-align: middle;
     }
 
-    #round-table-container thead {
-        display: none;
+    #round-table-container th {
+        font-size: 0;
+        letter-spacing: 0;
+        line-height: 1;
     }
 
-    #score-table-body tr {
-        background-color: #111827;
-        border: 1px solid #374151;
-        border-radius: 0.75rem;
-        margin-bottom: 0.75rem;
-        padding: 0.75rem;
-    }
+    #round-table-container th:nth-child(1)::after { content: "P"; }
+    #round-table-container th:nth-child(2)::after { content: "Bid"; }
+    #round-table-container th:nth-child(3)::after { content: "Won"; }
+    #round-table-container th:nth-child(4)::after { content: "Bon"; }
+    #round-table-container th:nth-child(5)::after { content: "Rnd"; }
+    #round-table-container th:nth-child(6)::after { content: "Tot"; }
 
-    #score-table-body td {
-        display: grid;
-        grid-template-columns: minmax(5.75rem, 1fr) minmax(5.5rem, auto);
-        align-items: center;
-        gap: 0.75rem;
-        border: 0;
-        padding: 0.4rem 0;
-        text-align: right;
-    }
-
-    #score-table-body td::before {
-        content: attr(data-label);
+    #round-table-container th::after {
         color: #9ca3af;
-        font-size: 0.75rem;
+        font-size: 0.65rem;
         font-weight: 700;
-        letter-spacing: 0.08em;
-        text-align: left;
         text-transform: uppercase;
     }
 
+    #round-table-container th:first-child,
     #score-table-body td:first-child {
-        border-bottom: 1px solid #374151;
-        font-size: 1.125rem;
-        padding-bottom: 0.65rem;
-        text-align: right;
+        left: 0;
+        position: sticky;
+        width: 4.4rem;
+        z-index: 5;
+    }
+
+    #round-table-container th:first-child {
+        background-color: #111827;
+    }
+
+    #score-table-body td:first-child {
+        background-color: #111827;
+        font-size: 0.8rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     #score-table-body input {
-        justify-self: end;
-        min-height: 48px;
-        width: 5.5rem;
-        font-size: 1.125rem;
-        border-radius: 0.5rem;
+        min-height: 34px;
+        width: 3.15rem;
+        font-size: 0.95rem;
+        padding: 0.25rem;
+        border-radius: 0.35rem;
     }
 
     #score-table-body span {
-        justify-self: end;
-        min-width: 4rem;
-        padding: 0.45rem 0.75rem;
+        min-width: 3.1rem;
+        padding: 0.25rem 0.35rem;
     }
 
     #game-buttons {
-        gap: 0.75rem;
-        margin-top: 1rem;
+        gap: 0.45rem;
+        margin-top: 0.65rem;
         position: sticky;
-        bottom: 0.5rem;
+        bottom: 0.35rem;
         z-index: 20;
     }
 
     #game-buttons button {
         width: 100%;
-        min-height: 54px;
-        font-size: 1.05rem;
-        padding: 0.85rem 1rem;
+        min-height: 42px;
+        font-size: 0.95rem;
+        padding: 0.55rem 0.65rem;
     }
 
     #summary-table-container table {
